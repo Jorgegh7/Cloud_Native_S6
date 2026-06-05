@@ -14,6 +14,9 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 
@@ -27,6 +30,9 @@ public class GuiaDespachoS3ServiceImpl implements GuiaDespachoS3Service {
 
     @Value("${aws.s3.bucket}")
     private String bucket;
+
+    @Value("${app.efs.path}")
+    private String efsPath;
 
     /**
      * Genera la ruta en S3 organizada por fecha y transportista.
@@ -68,20 +74,40 @@ public class GuiaDespachoS3ServiceImpl implements GuiaDespachoS3Service {
 
     @Override
     public void subirGuia(Long guiaId) {
+
+        //Comprueba si existe la Guia Despacho
         GuiaDespacho guia = guiaDespachoRepository.findById(guiaId)
                 .orElseThrow(() -> new RuntimeException("Guía de despacho no encontrada"));
 
         byte[] contenido = generarGuia(guiaId);
         String key = generarKey(guia);
+        String fileName = guia.getNumeroGuia() + ".txt";
 
-        s3Client.putObject(
-                PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(key)
-                        .contentType("text/plain")
-                        .build(),
-                RequestBody.fromBytes(contenido)
-        );
+        try {
+            // 1. Guardar temporalmente en EFS
+            Path efsFile = Path.of(efsPath, fileName);
+            Files.createDirectories(efsFile.getParent());
+            Files.write(efsFile, contenido);
+
+            // Esperar 10 segundos para verificar en EFS
+            Thread.sleep(10000);
+
+            // 2. Subir a S3 desde EFS
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType("text/plain")
+                            .build(),
+                    RequestBody.fromBytes(Files.readAllBytes(efsFile))
+            );
+
+            // 3. Borrar archivo temporal de EFS
+            Files.deleteIfExists(efsFile);
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Error al procesar archivo en EFS", e);
+        }
     }
 
     @Override
