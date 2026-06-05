@@ -1,9 +1,11 @@
 package com.duoc.sistema_pedidos.service.impl;
 
 import com.duoc.sistema_pedidos.model.GuiaDespacho;
+import com.duoc.sistema_pedidos.model.Pedido;
 import com.duoc.sistema_pedidos.model.Rol;
 import com.duoc.sistema_pedidos.model.Usuario;
 import com.duoc.sistema_pedidos.repository.GuiaDespachoRepository;
+import com.duoc.sistema_pedidos.repository.PedidoRepository;
 import com.duoc.sistema_pedidos.repository.UsuarioRepository;
 import com.duoc.sistema_pedidos.service.contrato.GuiaDespachoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,13 @@ public class GuiaDespachoServiceImpl implements GuiaDespachoService {
 
     private final GuiaDespachoRepository guiaDespachoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PedidoRepository pedidoRepository;
 
     @Autowired
-    public GuiaDespachoServiceImpl(GuiaDespachoRepository guiaDespachoRepository, UsuarioRepository usuarioRepository) {
+    public GuiaDespachoServiceImpl(GuiaDespachoRepository guiaDespachoRepository, UsuarioRepository usuarioRepository, PedidoRepository pedidoRepository) {
         this.guiaDespachoRepository = guiaDespachoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
 
@@ -52,11 +56,11 @@ public class GuiaDespachoServiceImpl implements GuiaDespachoService {
 
     @Override
     public Optional<GuiaDespacho> update(Long id, GuiaDespacho guiaDespacho) {
-        if(!guiaDespachoRepository.existsById(guiaDespacho.getId())){
-            throw new RuntimeException("Guia de Despacho no encontrado");
+        if (!guiaDespachoRepository.existsById(id)) {
+            throw new RuntimeException("Guía de despacho no encontrada");
         }
-        
-        return guiaDespachoRepository.findById(guiaDespacho.getId()).map(g ->{
+
+        return guiaDespachoRepository.findById(id).map(g -> {
             Usuario transportista = usuarioRepository.findById(guiaDespacho.getTransportista().getId())
                     .orElseThrow(() -> new RuntimeException("Transportista no encontrado"));
 
@@ -64,11 +68,13 @@ public class GuiaDespachoServiceImpl implements GuiaDespachoService {
                 throw new RuntimeException("El usuario no tiene rol TRANSPORTISTA");
             }
 
-            g.setTransportista(transportista);
-            g.setEstado(guiaDespacho.getEstado());
-            g.setNumeroGuia(guiaDespacho.getNumeroGuia());
-            return guiaDespachoRepository.save(g);
+            Pedido pedido = pedidoRepository.findById(guiaDespacho.getPedido().getId())
+                    .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
+            g.setTransportista(transportista);
+            g.setPedido(pedido);
+            g.setEstado(guiaDespacho.getEstado());
+            return guiaDespachoRepository.save(g);
         });
     }
 

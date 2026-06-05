@@ -2,7 +2,9 @@ package com.duoc.sistema_pedidos.service.impl;
 
 import com.duoc.sistema_pedidos.model.GuiaDespacho;
 import com.duoc.sistema_pedidos.model.Pedido;
+import com.duoc.sistema_pedidos.model.Usuario;
 import com.duoc.sistema_pedidos.repository.GuiaDespachoRepository;
+import com.duoc.sistema_pedidos.repository.UsuarioRepository;
 import com.duoc.sistema_pedidos.service.contrato.GuiaDespachoS3Service;
 import com.duoc.sistema_pedidos.service.contrato.GuiaDespachoService;
 import lombok.RequiredArgsConstructor;
