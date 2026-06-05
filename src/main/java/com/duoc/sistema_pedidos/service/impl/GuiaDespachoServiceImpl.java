@@ -51,6 +51,11 @@ public class GuiaDespachoServiceImpl implements GuiaDespachoService {
             throw new RuntimeException("El usuario no tiene rol TRANSPORTISTA");
         }
 
+        Pedido pedido = pedidoRepository.findById(guiaDespacho.getPedido().getId())
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+        guiaDespacho.setTransportista(transportista);
+        guiaDespacho.setPedido(pedido);
         return guiaDespachoRepository.save(guiaDespacho);
     }
 
