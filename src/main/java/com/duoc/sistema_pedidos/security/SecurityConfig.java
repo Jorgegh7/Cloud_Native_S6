@@ -31,8 +31,19 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        String jwkSetUri = "https://login.microsoftonline.com/af524a33-531a-4faf-ab02-396a981b9499/discovery/v2.0/keys";
-        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+        String b2cJwkSetUri = "https://mscloudnativeduoc.b2clogin.com/mscloudnativeduoc.onmicrosoft.com/discovery/v2.0/keys?p=b2c_1_susi";
+        String microsoftJwkSetUri = "https://login.microsoftonline.com/af524a33-531a-4faf-ab02-396a981b9499/discovery/v2.0/keys";
+
+        NimbusJwtDecoder b2cDecoder = NimbusJwtDecoder.withJwkSetUri(b2cJwkSetUri).build();
+        NimbusJwtDecoder microsoftDecoder = NimbusJwtDecoder.withJwkSetUri(microsoftJwkSetUri).build();
+
+        return token -> {
+            try {
+                return b2cDecoder.decode(token);
+            } catch (Exception e) {
+                return microsoftDecoder.decode(token);
+            }
+        };
     }
 
     @Bean
