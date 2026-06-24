@@ -15,18 +15,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/s3/test").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwkSetUri(
-                                "https://mscloudnativeduoc.b2clogin.com/mscloudnativeduoc.onmicrosoft.com/discovery/v2.0/keys?p=B2C_1_susi"
-                        ))
-                )
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable())
-                );
-
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
         return http.build();
     }
 }
