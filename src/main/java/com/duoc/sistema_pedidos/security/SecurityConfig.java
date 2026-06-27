@@ -21,7 +21,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/s3/test").permitAll()
                         .requestMatchers("/guias/*/descargar").hasAnyAuthority("ROLE_Lector", "ROLE_Admin")
-                        .anyRequest().authenticated()
+                        .anyRequest().hasAnyAuthority("ROLE_Admin", "SCOPE_https://mscloudnativeduoc.onmicrosoft.com/23d0b39b-4cb7-4f7f-be33-db0c77da50f9/.default")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
