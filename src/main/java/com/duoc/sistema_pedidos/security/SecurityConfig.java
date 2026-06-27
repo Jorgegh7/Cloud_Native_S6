@@ -21,7 +21,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/s3/test").permitAll()
                         .requestMatchers("/guias/*/descargar").hasAnyAuthority("ROLE_Lector", "ROLE_Admin")
-                        .anyRequest().hasAuthority("ROLE_Admin")
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
