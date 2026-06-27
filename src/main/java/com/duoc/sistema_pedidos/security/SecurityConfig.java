@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/s3/test").permitAll()
-                        .requestMatchers("/guias/*/descargar").hasAnyAuthority("ROLE_Lector", "ROLE_Admin")
+                        .requestMatchers("/guias/*/descargar").hasAnyAuthority("ROLE_Lector", "ROLE_Admin", "ROLE_APP")
                         .anyRequest().hasAnyAuthority("ROLE_Admin", "ROLE_APP")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
