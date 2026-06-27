@@ -4,11 +4,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/s3/test").permitAll()
                         .requestMatchers("/guias/*/descargar").hasAnyAuthority("ROLE_Lector", "ROLE_Admin")
-                        .anyRequest().hasAnyAuthority("ROLE_Admin", "SCOPE_https://mscloudnativeduoc.onmicrosoft.com/23d0b39b-4cb7-4f7f-be33-db0c77da50f9/.default")
+                        .anyRequest().hasAnyAuthority("ROLE_Admin", "ROLE_APP")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -48,12 +51,17 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("extension_consultaRol");
-
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
-        authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+            String rol = jwt.getClaimAsString("extension_consultaRol");
+            if (rol != null) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + rol));
+            } else {
+                authorities.add(new SimpleGrantedAuthority("ROLE_APP"));
+            }
+            return new java.util.ArrayList<>(authorities);
+        });
         return authenticationConverter;
     }
 }
