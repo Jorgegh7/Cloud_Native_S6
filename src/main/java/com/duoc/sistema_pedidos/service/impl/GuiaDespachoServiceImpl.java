@@ -11,6 +11,7 @@ import com.duoc.sistema_pedidos.service.contrato.GuiaDespachoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,5 +91,10 @@ public class GuiaDespachoServiceImpl implements GuiaDespachoService {
         }
         guiaDespachoRepository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public List<GuiaDespacho> findByTransportistaAndFecha(Long transportistaId, Date desde, Date hasta) {
+        return guiaDespachoRepository.findByTransportistaIdAndFechaCreacionBetween(transportistaId, desde, hasta);
     }
 }

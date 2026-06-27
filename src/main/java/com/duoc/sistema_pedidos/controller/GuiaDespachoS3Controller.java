@@ -38,7 +38,7 @@ public class GuiaDespachoS3Controller {
         }
     }
 
-        @GetMapping("/{id}/descargar")
+    @GetMapping("/{id}/descargar")
     public ResponseEntity<?> descargarGuia(@PathVariable Long id) {
         try {
             byte[] guia = guiaDespachoS3Service.descargarGuia(id);

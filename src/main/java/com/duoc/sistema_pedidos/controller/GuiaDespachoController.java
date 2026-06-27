@@ -3,9 +3,11 @@ package com.duoc.sistema_pedidos.controller;
 import com.duoc.sistema_pedidos.model.GuiaDespacho;
 import com.duoc.sistema_pedidos.service.contrato.GuiaDespachoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -58,5 +60,14 @@ public class GuiaDespachoController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<?> consultarPorTransportistaYFecha(
+            @RequestParam Long transportistaId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date desde,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date hasta) {
+        List<GuiaDespacho> guias = guiaDespachoService.findByTransportistaAndFecha(transportistaId, desde, hasta);
+        return ResponseEntity.ok(guias);
     }
 }
